@@ -1,17 +1,3 @@
 {
-  "912878025878687774": {
-    "692095041635614750": [
-      {
-        "Message": "new test message",
-        "Channel": "912878025878687777",
-        "Active": true,
-        "Schedule Time": "2022-02-09 03:00:00",
-        "isRepetitive": false,
-        "Repetition Time in minutes": 0
-      }
-    ]
-  },
-  "801897535475679293": {
-    "692095041635614750": []
-  }
+  
 }
