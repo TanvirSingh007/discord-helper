@@ -5,7 +5,7 @@ import discord
 import datetime
 import json
 
-TOKEN = ''
+TOKEN = 'MTAwMDI1NTgzNjQ4NjExMTI0Mg.G03A0Z.tKwSNj45WNJOLtxgWLOvQpfFHW2-HE6j-lAOcI'
 client = discord.Client()
 
 commandlist = ["-help", '-list', '-schedule', '-delete']
@@ -18,13 +18,13 @@ def isInteger (string):
         return False
 
 def loadMessages():
-    f = open('C:/Users/jyotb/OneDrive/Desktop/discBOT/messages.json')
+    f = open('C:/Users/jyotb/OneDrive/Desktop/discBOT/DiscordMessageScheduler/messages.json')
     data = json.load(f)
     f.close()
     return data
 
 def saveMessages(data):
-    f = open('C:/Users/jyotb/OneDrive/Desktop/discBOT/messages.json', 'w')
+    f = open('C:/Users/jyotb/OneDrive/Desktop/discBOT/DiscordMessageScheduler/messages.json', 'w')
     json.dump(data, f, indent = 2)
     f.close()
 
@@ -53,7 +53,7 @@ def listMessage(message):
             index = 1
             for scheduledMessage in data[serverid][userid]:
                 if(scheduledMessage["Active"]):
-                    retval = retval + str(index) + ':```' + scheduledMessage["Message"] + '``` is scheduled at ' + scheduledMessage["Schedule Time"] + ' on ' + scheduledMessage["Schedule Date"] + ' in <#' + scheduledMessage["Channel"] + '>\n'
+                    retval = retval + str(index) + ':```' + scheduledMessage["Message"] + '``` is scheduled at ' + (datetime.datetime.strptime(scheduledMessage["Schedule Time"], "%Y-%d-%m %H:%M:%S")).strftime('%d-%B-%Y %H:%M') + ' in <#' + scheduledMessage["Channel"] + '>\n'
                 index += 1
             return retval
 
@@ -84,13 +84,61 @@ def delMessage(message):
         return 'You have no scheduled messages'
 
 def scheduleMessage(message):
+    serverid = str(message.guild.id)
+    userid = str(message.author.id)
     try:
         if(len(message.content.split("'''"))!=3):
             raise Exception
+        
         schMessage = message.content.split("'''")[1]
-        if(len(message.content.split(" "))!=1):
+        if(message.content.split("'''")[0] != '-schedule '):
             raise Exception
-        if(len )
+        
+        args = message.content.split("'''")[2].split(' ')
+        if(args[0] == ''):
+            args.pop(0)
+        numArgs = len(args)
+        if(not (numArgs == 2 or numArgs == 3 or numArgs == 4)):
+            raise Exception
+
+        time = datetime.datetime.strptime(args[0] + ' ' + args[1], "%d/%m/%Y %H:%M")
+        channel = str(message.channel.id)
+        delayInMins = 0
+
+        if(numArgs > 2):
+            if(args[2][0:2] == '<#' and args[2][-1] == '>'):
+                channel = args[2][2:-1]
+                if(numArgs == 4):
+                    delayInMins = int(args[3])
+            else:
+                channel = str(message.channel.id)
+                delayInMins = int(args[2])
+
+        newschedule = {
+            "Message": schMessage,
+            "Channel": channel,
+            "Active": True,
+            "Schedule Time": str(time),
+            "isRepetitive": (delayInMins > 60),
+            "Repetition Time in minutes": delayInMins
+        }
+
+        messageData = loadMessages()
+
+        if(serverid in messageData.keys()):
+            if(userid in messageData[serverid].keys()):
+                messageData[serverid][userid].append(newschedule)
+            else:
+                messageData[serverid][userid] = [newschedule]
+        else:
+            newuser = {
+                userid: [newschedule]
+            }
+            messageData[serverid] = newuser
+
+        saveMessages(messageData)
+
+        return 'success'
     except:
         return 'Incorrect format, use -help to know more'    
 
