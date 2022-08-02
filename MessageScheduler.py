@@ -5,7 +5,9 @@ import discord
 import datetime
 import json
 
-TOKEN = 'MTAwMDI1NTgzNjQ4NjExMTI0Mg.G03A0Z.tKwSNj45WNJOLtxgWLOvQpfFHW2-HE6j-lAOcI'
+tokenFile = open('BotToken.txt')
+TOKEN = tokenFile.read()
+tokenFile.close()
 client = discord.Client()
 
 commandlist = ["-help", '-list', '-schedule', '-delete']
@@ -18,28 +20,15 @@ def isInteger (string):
         return False
 
 def loadMessages():
-    f = open('C:/Users/jyotb/OneDrive/Desktop/discBOT/DiscordMessageScheduler/messages.json')
+    f = open('messages.json')
     data = json.load(f)
     f.close()
     return data
 
 def saveMessages(data):
-    f = open('C:/Users/jyotb/OneDrive/Desktop/discBOT/DiscordMessageScheduler/messages.json', 'w')
+    f = open('messages.json', 'w')
     json.dump(data, f, indent = 2)
     f.close()
-
-def addMessage(data, server, user, channel, message, scheduleDate, scheduleTime, isRepetitive, repetetionTime="0"):
-    newMessage = {
-        "Message": message,
-        "Channel": channel,
-        "Active": True,
-        "Schedule Date": scheduleDate,
-        "Schedule Time": scheduleTime,
-        "isRepetitive": isRepetitive,
-        "Repetition Time": repetetionTime
-    }
-    data[server][user].append(newMessage)    
-    saveMessages(data)
 
 def listMessage(message):
     data = loadMessages()
