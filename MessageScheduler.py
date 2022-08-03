@@ -107,9 +107,13 @@ def scheduleMessage(message):
 
         while '```' in schMessage:
             i = schMessage.find('```')
-            schMessage.pop(i)
-            schMessage.pop(i)
-            schMessage.pop(i)
+            schMessage = schMessage[0:i] + schMessage[i+3:]
+        
+        while schMessage[0] == '`':
+            schMessage = schMessage[1:]
+        
+        while schMessage[len(schMessage)-1] == '`':
+            schMessage = schMessage[0:len(schMessage)-2]
 
         newschedule = {
             "Message": schMessage,
