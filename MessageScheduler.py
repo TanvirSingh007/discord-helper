@@ -10,7 +10,7 @@ TOKEN = tokenFile.read()
 tokenFile.close()
 client = discord.Client()
 
-commandlist = ["-help", '-list', '-schedule', '-delete']
+commandlist = ["-help", '-list', '-schedule', '-delete', '-info']
 
 def isInteger (string):
     try:
@@ -29,6 +29,7 @@ def saveMessages(data):
     f = open('messages.json', 'w')
     json.dump(data, f, indent = 2)
     f.close()
+    getScheduledTime()
 
 def listMessage(message):
     data = loadMessages()
@@ -42,7 +43,7 @@ def listMessage(message):
             index = 1
             for scheduledMessage in data[serverid][userid]:
                 if(scheduledMessage["Active"]):
-                    retval = retval + str(index) + ':```' + scheduledMessage["Message"] + '``` is scheduled at ' + (datetime.datetime.strptime(scheduledMessage["Schedule Time"], "%Y-%d-%m %H:%M:%S")).strftime('%d-%B-%Y %H:%M') + ' in <#' + scheduledMessage["Channel"] + '>\n'
+                    retval = retval + str(index) + ':```' + scheduledMessage["Message"] + '``` is scheduled at ' + (datetime.datetime.strptime(scheduledMessage["Schedule Time"], '%d/%m/%Y %H:%M')).strftime('%d-%B-%Y %H:%M') + ' in <#' + scheduledMessage["Channel"] + '>\n'
                 index += 1
             return retval
 
@@ -90,7 +91,7 @@ def scheduleMessage(message):
         if(not (numArgs == 2 or numArgs == 3 or numArgs == 4)):
             raise Exception
 
-        time = datetime.datetime.strptime(args[0] + ' ' + args[1], "%d/%m/%Y %H:%M")
+        time = datetime.datetime.strptime(args[0] + ' ' + args[1], '%d/%m/%Y %H:%M')
         channel = str(message.channel.id)
         delayInMins = 0
 
@@ -107,8 +108,8 @@ def scheduleMessage(message):
             "Message": schMessage,
             "Channel": channel,
             "Active": True,
-            "Schedule Time": str(time),
-            "isRepetitive": (delayInMins > 60),
+            "Schedule Time": time.strftime('%d/%m/%Y %H:%M'),
+            "isRepetitive": (delayInMins >= 5),
             "Repetition Time in minutes": delayInMins
         }
 
@@ -127,7 +128,7 @@ def scheduleMessage(message):
 
         saveMessages(messageData)
 
-        return 'success'
+        return 'Message Scheduled'
     except:
         return 'Incorrect format, use -help to know more'    
 
@@ -137,30 +138,75 @@ async def sendmessage (channel, message):
     
 async def parseCommand(message):
     command = message.content
+    info = '''
+        ```Message scheduler for discord by bjsbrar
+        https://github.com/bjsbrar/DiscordMessageScheduler``` 
+    '''
+    help = '''
+```Command List:
+  -help     : List Commands
+  -info     : Bot Information
+  -list     : Provides a list of all scheduled messages
+  -schedule : Schedules a message\n''' + "              Usage: -schedule '''[message text]''' [Schedule Date (format: DD/MM/YYYY)] [Schedule Time (format: HH:MM)] *[#message channel] *[Repetetion time in minutes]\n" + '''
+              * Optional Parameters
+              Repetetion time must be 5 minutes or more to avoid spamming 
+  -delete   : Deletes a scheduled message at a given index 
+              Usage: -delete [index]```'''
+
     if(command.split(' ')[0] == '-help'):
-        await sendmessage (message.channel.id, '''
-```The available commands are:
-  -help
-  -list
-  -schedule
-  -delete```
-        ''')
+        await sendmessage (message.channel.id, help)
     elif(command.split(' ')[0] == '-delete'):
         await sendmessage (message.channel.id, delMessage(message))
     elif(command.split(' ')[0] == '-list'):
         await sendmessage (message.channel.id, listMessage(message))
     elif(command.split(' ')[0] == '-schedule'):
         await sendmessage (message.channel.id, scheduleMessage(message))
+    elif(command.split(' ')[0] == '-info'):
+        await sendmessage (message.channel.id, info)
+
+def getScheduledTime():
+    data = loadMessages()
+    global timeDict
+    timeDict = {}
+    for serverid in data.keys():
+        for userid in data[serverid].keys():
+            index  = 0
+            for message in data[serverid][userid]:
+                try:
+                    timeDict[(message["Schedule Time"])].append([serverid, userid, index])
+                except:
+                    timeDict[(message["Schedule Time"])] = [[serverid, userid, index]]
+                index = index + 1
+
+async def sendScheduledMessage(timeInfo):
+    print('Sending Message')
+    data = loadMessages()
+    for messageInfo in timeInfo:
+        serverid, userid, index = messageInfo
+        if data[serverid][userid][index]["Active"]:
+            await sendmessage(data[serverid][userid][index]["Channel"], data[serverid][userid][index]["Message"])
+            if data[serverid][userid][index]["isRepetitive"]:
+                now = datetime.datetime.strptime(data[serverid][userid][index]["Schedule Time"], '%d/%m/%Y %H:%M')
+                now += datetime.timedelta(minutes=data[serverid][userid][index]["Repetition Time in minutes"])
+                data[serverid][userid][index]["Schedule Time"] = now.strftime('%d/%m/%Y %H:%M')
+            else:
+                data[serverid][userid].pop(index)
+    saveMessages(data)
 
 async def idle():
-    data = loadMessages()
-    now = datetime.datetime.now()
-    
-    print(now.date())
+    global timeDict
+    getScheduledTime()
+
+    while True:
+        now = datetime.datetime.now()
+        now = now.strftime('%d/%m/%Y %H:%M')
+        try:
+            await sendScheduledMessage(timeDict[now])
+        except:
+            await asyncio.sleep(30)
 
 @client.event
 async def on_ready():
-    #await client.change_presence(status=discord.Status.online, activity=discord.CustomActivity(name=''))
     await idle()
 
 @client.event
