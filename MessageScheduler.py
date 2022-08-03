@@ -105,6 +105,12 @@ def scheduleMessage(message):
                 channel = str(message.channel.id)
                 delayInMins = int(args[2])
 
+        while '```' in schMessage:
+            i = schMessage.find('```')
+            schMessage.pop(i)
+            schMessage.pop(i)
+            schMessage.pop(i)
+
         newschedule = {
             "Message": schMessage,
             "Channel": channel,
