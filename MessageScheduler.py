@@ -110,7 +110,7 @@ def scheduleMessage(message):
             "Channel": channel,
             "Active": True,
             "Schedule Time": time.strftime('%d/%m/%Y %H:%M'),
-            "isRepetitive": (delayInMins >= 360),
+            "isRepetitive": ((delayInMins >= 360) and (delayInMins <= 5256000)),
             "Repetition Time in minutes": delayInMins
         }
 
