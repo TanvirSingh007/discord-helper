@@ -1,6 +1,7 @@
 import asyncio
 from http import server
 from time import sleep
+from click import command
 import discord
 import datetime
 import json
@@ -10,7 +11,7 @@ TOKEN = tokenFile.read()
 tokenFile.close()
 client = discord.Client()
 
-commandlist = ["-help", '-list', '-schedule', '-delete', '-info']
+commandlist = ["-help", '-list', '-schedule', '-delete', '-info', '-time']
 
 def isInteger (string):
     try:
@@ -109,7 +110,7 @@ def scheduleMessage(message):
             "Channel": channel,
             "Active": True,
             "Schedule Time": time.strftime('%d/%m/%Y %H:%M'),
-            "isRepetitive": (delayInMins >= 5),
+            "isRepetitive": (delayInMins >= 360),
             "Repetition Time in minutes": delayInMins
         }
 
@@ -126,9 +127,13 @@ def scheduleMessage(message):
             }
             messageData[serverid] = newuser
 
-        saveMessages(messageData)
+        if(len(messageData[serverid][userid]) < 10):
+            saveMessages(messageData)
+            return 'Message Scheduled'
+        
+        else:
+            return 'Message Limit Reached'
 
-        return 'Message Scheduled'
     except:
         return 'Incorrect format, use -help to know more'    
 
@@ -149,9 +154,10 @@ async def parseCommand(message):
   -list     : Provides a list of all scheduled messages
   -schedule : Schedules a message\n''' + "              Usage: -schedule '''[message text]''' [Schedule Date (format: DD/MM/YYYY)] [Schedule Time (format: HH:MM)] *[#message channel] *[Repetetion time in minutes]\n" + '''
               * Optional Parameters
-              Repetetion time must be 5 minutes or more to avoid spamming 
+              Repetetion time must be 6 hours (360 minutes) or more to avoid spamming 
   -delete   : Deletes a scheduled message at a given index 
-              Usage: -delete [index]```'''
+              Usage: -delete [index]
+  -time     : Displays server time```'''
 
     if(command.split(' ')[0] == '-help'):
         await sendmessage (message.channel.id, help)
@@ -163,6 +169,8 @@ async def parseCommand(message):
         await sendmessage (message.channel.id, scheduleMessage(message))
     elif(command.split(' ')[0] == '-info'):
         await sendmessage (message.channel.id, info)
+    elif(command.split(' ')[0] == '-time'):
+        await sendmessage (message.channel.id, datetime.datetime.now().strftime('%d-%B-%Y %H:%M'))
 
 def getScheduledTime():
     data = loadMessages()
@@ -179,6 +187,7 @@ def getScheduledTime():
                 index = index + 1
 
 async def sendScheduledMessage(timeInfo):
+    global commandQueue
     print('Sending Message')
     data = loadMessages()
     for messageInfo in timeInfo:
@@ -203,7 +212,11 @@ async def idle():
         try:
             await sendScheduledMessage(timeDict[now])
         except:
-            await asyncio.sleep(30)
+            try:
+                message = commandQueue.pop(0)
+                await parseCommand(message)
+            except:
+                await asyncio.sleep(1)
 
 @client.event
 async def on_ready():
@@ -211,8 +224,12 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    global commandQueue
     if((str(message.content).split(' '))[0] in commandlist):
-        await parseCommand(message)
+        try:
+            commandQueue.append(message)
+        except:
+            commandQueue = [message]
 
 client.run(TOKEN)
 
