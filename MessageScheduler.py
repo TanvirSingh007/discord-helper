@@ -91,11 +91,11 @@ def scheduleMessage(message):
         numArgs = len(args)
         if(not (numArgs == 2 or numArgs == 3 or numArgs == 4)):
             raise Exception
-
+        
         time = datetime.datetime.strptime(args[0] + ' ' + args[1], '%d/%m/%Y %H:%M')
         channel = str(message.channel.id)
         delayInMins = 0
-
+        
         if(numArgs > 2):
             if(args[2][0:2] == '<#' and args[2][-1] == '>'):
                 channel = args[2][2:-1]
@@ -104,7 +104,7 @@ def scheduleMessage(message):
             else:
                 channel = str(message.channel.id)
                 delayInMins = int(args[2])
-
+        
         while '```' in schMessage:
             i = schMessage.find('```')
             schMessage = schMessage[0:i] + schMessage[i+3:]
@@ -155,7 +155,8 @@ async def parseCommand(message):
     command = message.content
     info = '''
         ```Message scheduler for discord by bjsbrar
-        https://github.com/bjsbrar/DiscordMessageScheduler``` 
+        https://github.com/bjsbrar/DiscordMessageScheduler
+        Waring: Bad Code``` 
     '''
     help = '''
 ```Command List:
