@@ -5,11 +5,10 @@ from click import command
 import discord
 import datetime
 import json
+import os
 
-tokenFile = open('BotToken.txt')
-TOKEN = tokenFile.read()
-tokenFile.close()
-client = discord.Client()
+TOKEN = os.environ['BOT_TOKEN']
+client = discord.Client(intents=discord.Intents.all())
 
 commandlist = ["-help", '-list', '-schedule', '-delete', '-info', '-time']
 
@@ -20,8 +19,19 @@ def isInteger (string):
     except:
         return False
 
+def createMessagesFile():
+    f = open('messages.json', 'w')
+    data = { }
+    json.dump(data, f, indent = 2)
+    f.close()
+
 def loadMessages():
-    f = open('messages.json')
+    try:
+        f = open('messages.json', 'r')
+    except:
+        createMessagesFile()
+        f = open('messages.json', 'r')
+
     data = json.load(f)
     f.close()
     return data
@@ -236,6 +246,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
     global commandQueue
+    print(message.content)
     if((str(message.content).split(' '))[0] in commandlist):
         try:
             commandQueue.append(message)
