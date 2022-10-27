@@ -64,8 +64,8 @@ python bot.py
 Create a .env file and add the following to it:
 
 | Variable  | What it is     |
-| --------- | -------------- | --- |
-| BOT_TOKEN | Your Bot Token |     |
+| --------- | -------------- |
+| BOT_TOKEN | Your Bot Token |
 
 # Issues or Questions
 
