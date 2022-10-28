@@ -56,6 +56,9 @@ Create a .env file and add the following to it:
 | Variable  | What it is     |
 | --------- | -------------- |
 | BOT_TOKEN | Your Bot Token |
+| --------- | -------------- |
+| BOT_ID | Your Bot ID |
+
 
 # Issues or Questions
 
