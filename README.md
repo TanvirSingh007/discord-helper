@@ -2,9 +2,9 @@
 
 <p align="center">
   <a href="https://github.com/bjsbrar/discord-helper/commits/main"><img src="https://img.shields.io/github/last-commit/bjsbrar/discord-helper"></a>
-  <a href="https//github.com/bjsbrar/discord-helper/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/bjsbrar/discord-helper"></a>
+  <a href="https://github.com/bjsbrar/discord-helper/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/bjsbrar/discord-helper"></a>
   <a href="https://github.com/bjsbrar/discord-helper"><img src="https://img.shields.io/github/languages/code-size/bjsbrar/discord-helper"></a>
-  <a href="https//github.com/bjsbrar/discord-helper/issues"><img src="https://img.shields.io/github/issues-raw/bjsbrar/discord-helper"></a>
+  <a href="https://github.com/bjsbrar/discord-helper/issues"><img src="https://img.shields.io/github/issues-raw/bjsbrar/discord-helper"></a>
 </p>
 
 This bot can schedule messages for Discord Servers.
@@ -14,7 +14,7 @@ If you plan to use this bot as a template to make your own bot, you **have to**:
 - Keep the credits, and a link to this repository in all the files that contains my code
 - Keep the same license for unchanged code
 
-See [the license file](https//github.com/bjsbrar/discord-helper/blob/main/LICENSE.md) for more
+See [the license file](https://github.com/bjsbrar/discord-helper/blob/main/LICENSE.md) for more
 information, I reserve the right to take down any repository that does not meet these requirements.
 
 # Prerequsites
