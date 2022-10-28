@@ -37,26 +37,16 @@ Install dependencies using the following command:
 pipenv install
 ```
 
-If you have multiple versions of python installed (2.x and 3.x) then you will need to use the following command:
+Use the command to run the pipenv shell:
 
 ```
-python3 bot.py
+pipenv shell
 ```
 
-or eventually
+Then run the following command in pipenv shell to run the bot.
 
 ```
-python3.x bot.py
-```
-
-Replace `x` with the version of Python you have installed.
-
-<br>
-
-If you have just installed python today, then you just need to use the following command:
-
-```
-python bot.py
+python3 messagescheduler.py
 ```
 
 # How to set up
