@@ -4,10 +4,11 @@ from time import sleep
 from click import command
 import discord
 import datetime
+from decouple import config
 import json
 import os
 
-TOKEN = os.environ['BOT_TOKEN']
+TOKEN = config("BOT_TOKEN")
 client = discord.Client(intents=discord.Intents.all())
 
 commandlist = ["-help", '-list', '-schedule', '-delete', '-info', '-time']
